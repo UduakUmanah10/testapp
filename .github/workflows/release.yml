@@ -27,6 +27,7 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew clean testDebug
 
+
   distribute:
     name: Distribute Bundle to Google Play
     needs: test
@@ -52,17 +53,23 @@ jobs:
           gradlePath: app/build.gradle.kts
           versionCode: ${{ github.run_number }}
 
-      - name: Build Release Bundle
-        run: ./gradlew bundleRelease
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > release-key.jks
 
-      - name: Sign Release
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/release
-          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          alias: ${{ secrets.ANDROID_DEVS_ALIAS }}
-          keyPassword: ${{ secrets.ANDROID_DEVS_ALIAS_PASSWORD }}
+      - name: Verify Keystore
+        run: |
+          keytool -list \
+          -keystore release-key.jks \
+          -storepass "${{ secrets.KEYSTORE_PASSWORD }}"
+
+      - name: Build Signed Release Bundle
+        env:
+          KEYSTORE_FILE: release-key.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_DEVS_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_DEVS_ALIAS_PASSWORD }}
+        run: ./gradlew bundleRelease
 
       - name: Create Google Play service account file
         run: echo '${{ secrets.PLAY_AUTH_JSON }}' > service_account.json
@@ -72,7 +79,7 @@ jobs:
         with:
           serviceAccountJson: service_account.json
           packageName: com.safetyapp.safeapp
-          releaseFiles: app/release/app-release.aab
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: internal
           status: completed
           whatsNewDirectory: whatsNew
