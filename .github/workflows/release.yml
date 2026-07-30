@@ -58,7 +58,7 @@ jobs:
       - name: Sign Release
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/bundle/release
+          releaseDirectory: app/release
           signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           alias: ${{ secrets.ANDROID_DEVS_ALIAS }}
@@ -72,7 +72,7 @@ jobs:
         with:
           serviceAccountJson: service_account.json
           packageName: com.safetyapp.safeapp
-          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          releaseFiles: app/release/app-release.aab
           track: internal
           status: completed
           whatsNewDirectory: whatsNew
