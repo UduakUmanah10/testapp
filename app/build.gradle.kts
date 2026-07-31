@@ -21,28 +21,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file(System.getenv("KEYSTORE_FILE"))
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
-        }
-    }
+
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            optimization {
+                enable = false
+            }
         }
     }
-
-//    buildTypes {
-//        release {
-//            optimization {
-//                enable = false
-//            }
-//        }
-//    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
